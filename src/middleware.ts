@@ -10,11 +10,13 @@ export async function middleware(req: NextRequest) {
 
   if (isProtectedAdminRoute) {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    const userRole = (token?.role as string) || "";
 
-    if (!token || token.role !== "admin") {
+    // Permite el acceso tanto a "admin" como a "moderator"
+    if (!token || !["admin", "moderator"].includes(userRole)) {
       if (pathname.startsWith("/api/")) {
         return NextResponse.json(
-          { error: "No autorizado. Se requieren permisos de administrador." },
+          { error: "No autorizado. Se requieren permisos de administración o moderación." },
           { status: 401 }
         );
       }

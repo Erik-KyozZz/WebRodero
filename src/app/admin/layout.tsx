@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Sliders, MessageSquare, LogOut } from "lucide-react";
+import { LayoutDashboard, Sliders, MessageSquare, Users, LogOut } from "lucide-react";
 import { signOut } from "next-auth/react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -13,6 +13,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { href: "/admin/products", label: "Presets & Servicios", icon: Sliders },
     { href: "/admin/orders", label: "Entregas & Pedidos Chat", icon: MessageSquare },
+    { href: "/admin/users", label: "Usuarios & Roles", icon: Users },
   ];
 
   return (
