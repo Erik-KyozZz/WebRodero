@@ -78,7 +78,7 @@ export default function CartPage() {
                     </span>
                   </h3>
                   <span className="text-sm text-slate-400 font-semibold">
-                    ${item.price.toFixed(2)} c/u
+                    {item.price.toFixed(2)}€ c/u
                   </span>
                 </div>
               </div>
@@ -102,7 +102,7 @@ export default function CartPage() {
 
                 <div className="text-right">
                   <span className="font-extrabold text-white text-lg block">
-                    ${(item.price * item.quantity).toFixed(2)}
+                    {(item.price * item.quantity).toFixed(2)}€
                   </span>
                 </div>
 
@@ -166,7 +166,7 @@ export default function CartPage() {
           <div className="space-y-3 text-sm text-slate-300 pb-4 border-b border-slate-800">
             <div className="flex justify-between">
               <span>Subtotal</span>
-              <span>${totalPrice.toFixed(2)}</span>
+              <span>{totalPrice.toFixed(2)}€</span>
             </div>
             <div className="flex justify-between text-cyan-400">
               <span>Entrega Digital / Chat</span>
@@ -176,7 +176,7 @@ export default function CartPage() {
 
           <div className="flex justify-between items-center py-4 font-bold text-lg text-white">
             <span>Total</span>
-            <span className="text-cyan-400">${totalPrice.toFixed(2)}</span>
+            <span className="text-cyan-400">{totalPrice.toFixed(2)}€</span>
           </div>
 
           <button

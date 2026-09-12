@@ -346,7 +346,7 @@ export default function AdminProductsPage() {
                     )}
                   </td>
                   <td className="py-3.5 px-4 font-bold text-white">
-                    ${product.price.toFixed(2)}
+                    {product.price.toFixed(2)}€
                   </td>
                   <td className="py-3.5 px-4">
                     {product.active ? (
@@ -541,7 +541,7 @@ export default function AdminProductsPage() {
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-slate-400 text-xs uppercase mb-1">Precio ($)</label>
+                  <label className="block text-slate-400 text-xs uppercase mb-1">Precio (€)</label>
                   <input
                     type="number"
                     step="0.01"

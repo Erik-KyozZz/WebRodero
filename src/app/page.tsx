@@ -134,7 +134,7 @@ export default function Home() {
                     <div>
                       <span className="text-xs text-slate-400 block">Precio</span>
                       <span className="text-xl font-extrabold text-white">
-                        ${product.price.toFixed(2)}
+                        {product.price.toFixed(2)}€
                       </span>
                     </div>
 

@@ -114,7 +114,7 @@ export default function ProductsPage() {
                   <div>
                     <span className="text-xs text-slate-500 block">Precio</span>
                     <span className="text-xl font-extrabold text-white">
-                      ${product.price.toFixed(2)}
+                      {product.price.toFixed(2)}€
                     </span>
                   </div>
 

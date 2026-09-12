@@ -96,7 +96,7 @@ export default function MyOrdersPage() {
                     <CheckCircle className="w-3.5 h-3.5" /> Pago Confirmado
                   </span>
                   <span className="text-lg font-extrabold text-white">
-                    ${order.totalAmount.toFixed(2)}
+                    {order.totalAmount.toFixed(2)}€
                   </span>
                 </div>
               </div>

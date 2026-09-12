@@ -43,7 +43,7 @@ export default function AdminDashboardPage() {
             <DollarSign className="w-5 h-5" />
           </div>
           <div className="text-3xl font-extrabold text-white">
-            ${metrics?.totalSales?.toFixed(2) || "0.00"}
+            {metrics?.totalSales?.toFixed(2) || "0.00"}€
           </div>
         </div>
 
@@ -106,7 +106,7 @@ export default function AdminDashboardPage() {
                       <span className="block text-xs text-slate-500">{order.user?.email}</span>
                     </td>
                     <td className="py-3.5 px-4 font-bold text-white">
-                      ${order.totalAmount.toFixed(2)}
+                      {order.totalAmount.toFixed(2)}€
                     </td>
                     <td className="py-3.5 px-4">
                       {order.paymentStatus === "paid" ? (

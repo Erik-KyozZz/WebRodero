@@ -98,7 +98,7 @@ export async function sendOrderConfirmationEmail({
           <span style="background: #06b6d4; color: #020617; font-size: 11px; font-weight: bold; padding: 2px 6px; border-radius: 4px; margin-left: 6px;">Digital / Servicio</span>
         </td>
         <td style="padding: 12px 0; text-align: center; color: #94a3b8;">${item.quantity}</td>
-        <td style="padding: 12px 0; text-align: right; color: #f8fafc;">$${(item.price * item.quantity).toFixed(2)}</td>
+        <td style="padding: 12px 0; text-align: right; color: #f8fafc;">${(item.price * item.quantity).toFixed(2)}€</td>
       </tr>
     `
     )
@@ -147,7 +147,7 @@ export async function sendOrderConfirmationEmail({
             </table>
 
             <div style="margin-top: 20px; text-align: right; font-size: 20px; font-weight: bold; color: #06b6d4;">
-              Total Pagado: $${totalAmount.toFixed(2)}
+              Total Pagado: ${totalAmount.toFixed(2)}€
             </div>
 
             ${orderCodeHtml}
