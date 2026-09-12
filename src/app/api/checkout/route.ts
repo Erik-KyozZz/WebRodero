@@ -6,12 +6,20 @@ import { Order } from "@/models/Order";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2025-08-27.acacia" as any,
-});
-
 export async function POST(req: Request) {
   try {
+    const stripeKey = process.env.STRIPE_SECRET_KEY;
+    if (!stripeKey) {
+      return NextResponse.json(
+        { error: "STRIPE_SECRET_KEY no está configurada en las variables de entorno de Vercel" },
+        { status: 500 }
+      );
+    }
+
+    const stripe = new Stripe(stripeKey, {
+      apiVersion: "2025-08-27.acacia" as any,
+    });
+
     const { items, customerEmail, customerName } = await req.json();
 
     if (!items || items.length === 0) {
@@ -32,7 +40,7 @@ export async function POST(req: Request) {
       const dbProduct = await Product.findById(item._id || item.id);
       if (!dbProduct || !dbProduct.active) {
         return NextResponse.json(
-          { error: `El producto ${item.name} no está disponible` },
+          { error: `El producto "${item.name}" ya no existe en la base de datos o está inactivo. Vuelve a añadirlo.` },
           { status: 400 }
         );
       }
@@ -95,7 +103,7 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error("Error al crear sesión de checkout:", error);
     return NextResponse.json(
-      { error: "Error al procesar el checkout", details: error.message },
+      { error: error.message || "Error al procesar el checkout en Stripe", details: error.stack },
       { status: 500 }
     );
   }
