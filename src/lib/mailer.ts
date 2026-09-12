@@ -1,14 +1,7 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT) || 587,
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
+const resendApiKey = process.env.RESEND_API_KEY;
+const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
 interface SendOrderEmailParams {
   to: string;
@@ -27,6 +20,11 @@ export async function sendOrderConfirmationEmail({
   totalAmount,
   orderCode,
 }: SendOrderEmailParams) {
+  if (!resend) {
+    console.warn("⚠️ RESEND_API_KEY no configurada. Omitiendo envío de correo.");
+    return;
+  }
+
   const itemsHtml = items
     .map(
       (item) => `
@@ -99,10 +97,16 @@ export async function sendOrderConfirmationEmail({
     </html>
   `;
 
-  await transporter.sendMail({
-    from: process.env.SMTP_FROM || '"Rodero Music Store" <noreply@roderomusic.com>',
-    to,
-    subject: `🎛️ Confirmación de Pedido Digital - Rodero Music (#${orderId.slice(-8)})`,
-    html: htmlContent,
-  });
+  try {
+    const fromAddress = process.env.RESEND_FROM_EMAIL || "Rodero Music <onboarding@resend.dev>";
+    await resend.emails.send({
+      from: fromAddress,
+      to: [to],
+      subject: `🎛️ Confirmación de Pedido Digital - Rodero Music (#${orderId.slice(-8)})`,
+      html: htmlContent,
+    });
+    console.log(`✅ Email enviado exitosamente vía Resend a ${to}`);
+  } catch (error) {
+    console.error("❌ Error enviando email con Resend:", error);
+  }
 }
