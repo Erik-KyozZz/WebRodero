@@ -2,44 +2,40 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { Lock, Mail, User as UserIcon, UserPlus, AlertCircle, KeyRound } from "lucide-react";
+import { Lock, Mail, KeyRound, ArrowRight, AlertCircle, CheckCircle2 } from "lucide-react";
 
-export default function RegisterPage() {
-  const [step, setStep] = useState<"register" | "verify">("register");
-  const [name, setName] = useState("");
+export default function ResetPasswordPage() {
+  const [step, setStep] = useState<"request" | "reset">("request");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
-  const handleRegister = async (e: React.FormEvent) => {
+  const handleRequestCode = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setMessage("");
     setLoading(true);
 
     try {
-      const res = await fetch("/api/auth/register", {
+      const res = await fetch("/api/auth/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ email }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Error al crear la cuenta");
+        setError(data.error || "Error al solicitar código");
         setLoading(false);
         return;
       }
 
-      setMessage("¡Código enviado! Revisa tu correo electrónico.");
-      setStep("verify");
+      setMessage("Si la cuenta existe, se ha enviado un código de recuperación a tu correo.");
+      setStep("reset");
       setLoading(false);
     } catch (err) {
       console.error(err);
@@ -48,43 +44,34 @@ export default function RegisterPage() {
     }
   };
 
-  const handleVerify = async (e: React.FormEvent) => {
+  const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setMessage("");
     setLoading(true);
 
     try {
-      const res = await fetch("/api/auth/verify-email", {
-        method: "POST",
+      const res = await fetch("/api/auth/reset-password", {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, code }),
+        body: JSON.stringify({ email, code, newPassword }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Código incorrecto");
+        setError(data.error || "Error al cambiar contraseña");
         setLoading(false);
         return;
       }
 
-      // Auto login tras verificación exitosa
-      const loginRes = await signIn("credentials", {
-        redirect: false,
-        email,
-        password,
-      });
-
-      if (loginRes?.ok) {
-        router.push("/");
-        router.refresh();
-      } else {
-        router.push("/login");
-      }
+      setMessage("¡Contraseña actualizada con éxito! Redirigiendo a inicio de sesión...");
+      setTimeout(() => {
+        window.location.href = "/login";
+      }, 2000);
     } catch (err) {
       console.error(err);
-      setError("Error al verificar el código");
+      setError("Error al actualizar la contraseña");
       setLoading(false);
     }
   };
@@ -94,15 +81,13 @@ export default function RegisterPage() {
       <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-8 shadow-2xl backdrop-blur-md">
         <div className="text-center mb-8">
           <div className="w-12 h-12 bg-sky-400/10 text-sky-400 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-sky-400/20">
-            {step === "register" ? <UserPlus className="w-6 h-6" /> : <KeyRound className="w-6 h-6" />}
+            <KeyRound className="w-6 h-6" />
           </div>
-          <h1 className="text-2xl font-bold text-white">
-            {step === "register" ? "Crear Cuenta" : "Verificar Correo"}
-          </h1>
+          <h1 className="text-2xl font-bold text-white">Recuperar Contraseña</h1>
           <p className="text-slate-400 text-xs mt-1">
-            {step === "register"
-              ? "Regístrate para comprar presets y solicitar servicios"
-              : `Ingresa el código enviado a ${email}`}
+            {step === "request"
+              ? "Ingresa tu correo para recibir un código de seguridad"
+              : `Ingresa el código enviado a ${email} y tu nueva contraseña`}
           </p>
         </div>
 
@@ -115,33 +100,16 @@ export default function RegisterPage() {
 
         {message && (
           <div className="mb-6 p-4 bg-cyan-500/10 border border-cyan-500/20 rounded-xl text-cyan-300 text-xs flex items-center gap-2">
-            <KeyRound className="w-4 h-4 flex-shrink-0" />
+            <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
             <span>{message}</span>
           </div>
         )}
 
-        {step === "register" ? (
-          <form onSubmit={handleRegister} className="space-y-4">
+        {step === "request" ? (
+          <form onSubmit={handleRequestCode} className="space-y-4">
             <div>
               <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">
-                Nombre Completo
-              </label>
-              <div className="relative">
-                <UserIcon className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
-                <input
-                  type="text"
-                  required
-                  placeholder="Ej: Carlos Gómez"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-11 pr-4 py-3 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-sky-400"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">
-                Correo Electrónico
+                Tu Correo Electrónico
               </label>
               <div className="relative">
                 <Mail className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
@@ -156,39 +124,22 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">
-                Contraseña
-              </label>
-              <div className="relative">
-                <Lock className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
-                <input
-                  type="password"
-                  required
-                  placeholder="Mínimo 6 caracteres"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-11 pr-4 py-3 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-sky-400"
-                />
-              </div>
-            </div>
-
             <button
               type="submit"
               disabled={loading}
               className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-sky-400 to-blue-600 hover:from-sky-300 hover:to-blue-500 text-slate-950 font-bold py-3 rounded-xl transition-all shadow-lg shadow-sky-400/20 text-sm disabled:opacity-50 mt-4"
             >
               {loading ? (
-                "Enviando código..."
+                "Enviando..."
               ) : (
                 <>
-                  <UserPlus className="w-4 h-4" /> Registrarme & Recibir Código
+                  Enviar Código por Correo <ArrowRight className="w-4 h-4" />
                 </>
               )}
             </button>
           </form>
         ) : (
-          <form onSubmit={handleVerify} className="space-y-4">
+          <form onSubmit={handleResetPassword} className="space-y-4">
             <div>
               <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">
                 Código de 6 Dígitos
@@ -207,16 +158,33 @@ export default function RegisterPage() {
               </div>
             </div>
 
+            <div>
+              <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5">
+                Nueva Contraseña
+              </label>
+              <div className="relative">
+                <Lock className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+                <input
+                  type="password"
+                  required
+                  placeholder="Mínimo 6 caracteres"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-11 pr-4 py-3 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-sky-400"
+                />
+              </div>
+            </div>
+
             <button
               type="submit"
               disabled={loading}
               className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-sky-400 to-blue-600 hover:from-sky-300 hover:to-blue-500 text-slate-950 font-bold py-3 rounded-xl transition-all shadow-lg shadow-sky-400/20 text-sm disabled:opacity-50 mt-4"
             >
               {loading ? (
-                "Verificando..."
+                "Guardando..."
               ) : (
                 <>
-                  <KeyRound className="w-4 h-4" /> Validar Código & Entrar
+                  <Lock className="w-4 h-4" /> Cambiar Contraseña
                 </>
               )}
             </button>
@@ -224,9 +192,9 @@ export default function RegisterPage() {
         )}
 
         <div className="mt-6 text-center text-xs text-slate-400">
-          ¿Ya tienes una cuenta?{" "}
+          ¿Recordaste tu contraseña?{" "}
           <Link href="/login" className="text-sky-400 font-semibold hover:underline">
-            Iniciar Sesión
+            Volver a Iniciar Sesión
           </Link>
         </div>
       </div>

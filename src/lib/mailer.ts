@@ -3,13 +3,82 @@ import { Resend } from "resend";
 const resendApiKey = process.env.RESEND_API_KEY;
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
-interface SendOrderEmailParams {
+interface SendEmailParams {
   to: string;
-  customerName: string;
-  orderId: string;
-  items: Array<{ name: string; quantity: number; price: number; isDigital: boolean }>;
-  totalAmount: number;
-  orderCode?: string;
+  subject: string;
+  html: string;
+}
+
+export async function sendEmail({ to, subject, html }: SendEmailParams) {
+  if (!resend) {
+    console.warn("⚠️ RESEND_API_KEY no configurada. Omitiendo envío de correo.");
+    return;
+  }
+
+  try {
+    const fromAddress = process.env.RESEND_FROM_EMAIL || "Rodero Music <onboarding@resend.dev>";
+    await resend.emails.send({
+      from: fromAddress,
+      to: [to],
+      subject,
+      html,
+    });
+    console.log(`✅ Email enviado exitosamente vía Resend a ${to}`);
+  } catch (error) {
+    console.error("❌ Error enviando email con Resend:", error);
+  }
+}
+
+export async function sendVerificationCodeEmail(to: string, name: string, code: string) {
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+      <head><meta charset="utf-8"></head>
+      <body style="font-family: Arial, sans-serif; background-color: #020617; color: #f8fafc; padding: 20px;">
+        <div style="max-width: 500px; margin: 0 auto; background: #0f172a; border-radius: 16px; padding: 30px; border: 1px solid #1e293b; text-align: center;">
+          <h2 style="color: #38bdf8; margin-top: 0;">RODERO MUSIC</h2>
+          <p style="font-size: 16px; color: #f8fafc;">Hola <strong>${name}</strong>,</p>
+          <p style="color: #94a3b8; font-size: 14px;">Tu código de verificación para completar el registro es:</p>
+          <div style="font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #020617; background: #38bdf8; padding: 12px 24px; display: inline-block; border-radius: 12px; margin: 20px 0;">
+            ${code}
+          </div>
+          <p style="color: #64748b; font-size: 12px;">Este código expirará en 15 minutos.</p>
+        </div>
+      </body>
+    </html>
+  `;
+
+  await sendEmail({
+    to,
+    subject: `🔑 Código de Verificación de Cuenta (${code}) - Rodero Music`,
+    html: htmlContent,
+  });
+}
+
+export async function sendPasswordResetEmail(to: string, name: string, code: string) {
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+      <head><meta charset="utf-8"></head>
+      <body style="font-family: Arial, sans-serif; background-color: #020617; color: #f8fafc; padding: 20px;">
+        <div style="max-width: 500px; margin: 0 auto; background: #0f172a; border-radius: 16px; padding: 30px; border: 1px solid #1e293b; text-align: center;">
+          <h2 style="color: #38bdf8; margin-top: 0;">RODERO MUSIC</h2>
+          <p style="font-size: 16px; color: #f8fafc;">Hola <strong>${name}</strong>,</p>
+          <p style="color: #94a3b8; font-size: 14px;">Has solicitado restablecer tu contraseña. Tu código de seguridad es:</p>
+          <div style="font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #020617; background: #38bdf8; padding: 12px 24px; display: inline-block; border-radius: 12px; margin: 20px 0;">
+            ${code}
+          </div>
+          <p style="color: #64748b; font-size: 12px;">Si no solicitaste este cambio, puedes ignorar este mensaje.</p>
+        </div>
+      </body>
+    </html>
+  `;
+
+  await sendEmail({
+    to,
+    subject: `🔐 Restablecer Contraseña (${code}) - Rodero Music`,
+    html: htmlContent,
+  });
 }
 
 export async function sendOrderConfirmationEmail({
@@ -19,15 +88,10 @@ export async function sendOrderConfirmationEmail({
   items,
   totalAmount,
   orderCode,
-}: SendOrderEmailParams) {
-  if (!resend) {
-    console.warn("⚠️ RESEND_API_KEY no configurada. Omitiendo envío de correo.");
-    return;
-  }
-
+}: any) {
   const itemsHtml = items
     .map(
-      (item) => `
+      (item: any) => `
       <tr style="border-bottom: 1px solid #334155;">
         <td style="padding: 12px 0; color: #f8fafc;">
           ${item.name} 
@@ -97,16 +161,9 @@ export async function sendOrderConfirmationEmail({
     </html>
   `;
 
-  try {
-    const fromAddress = process.env.RESEND_FROM_EMAIL || "Rodero Music <onboarding@resend.dev>";
-    await resend.emails.send({
-      from: fromAddress,
-      to: [to],
-      subject: `🎛️ Confirmación de Pedido Digital - Rodero Music (#${orderId.slice(-8)})`,
-      html: htmlContent,
-    });
-    console.log(`✅ Email enviado exitosamente vía Resend a ${to}`);
-  } catch (error) {
-    console.error("❌ Error enviando email con Resend:", error);
-  }
+  await sendEmail({
+    to,
+    subject: `🎛️ Confirmación de Pedido Digital - Rodero Music (#${orderId.slice(-8)})`,
+    html: htmlContent,
+  });
 }
