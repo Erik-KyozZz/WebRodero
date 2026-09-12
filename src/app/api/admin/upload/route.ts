@@ -40,3 +40,32 @@ export async function POST(req: Request) {
     );
   }
 }
+
+export async function GET() {
+  try {
+    const { readdir, stat } = await import("fs/promises");
+    const uploadDir = path.join(process.cwd(), "public", "uploads");
+    await mkdir(uploadDir, { recursive: true });
+    const fileNames = await readdir(uploadDir);
+
+    const files = await Promise.all(
+      fileNames.map(async (name) => {
+        const filePath = path.join(uploadDir, name);
+        const stats = await stat(filePath);
+        return {
+          fileName: name,
+          url: `/uploads/${name}`,
+          size: stats.size,
+          createdAt: stats.birthtime,
+        };
+      })
+    );
+
+    files.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    return NextResponse.json({ files });
+  } catch (error: any) {
+    return NextResponse.json({ files: [] });
+  }
+}
+
