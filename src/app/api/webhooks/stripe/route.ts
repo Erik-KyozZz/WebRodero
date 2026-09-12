@@ -6,13 +6,12 @@ import { Product } from "@/models/Product";
 import { sendOrderConfirmationEmail } from "@/lib/mailer";
 import crypto from "crypto";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2025-08-27.acacia" as any,
-});
-
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || "";
 
 export async function POST(req: Request) {
+  const stripeKey = process.env.STRIPE_SECRET_KEY || "";
+  const stripe = new Stripe(stripeKey);
+
   const body = await req.text();
   const signature = req.headers.get("stripe-signature");
 
