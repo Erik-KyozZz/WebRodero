@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useCart } from "@/context/CartContext";
-import { ShoppingBag, Trash2, Plus, Minus, CreditCard, ArrowRight, Download, MessageSquare } from "lucide-react";
+import { ShoppingBag, Trash2, Plus, Minus, CreditCard, ArrowRight, Download } from "lucide-react";
 import { useSession } from "next-auth/react";
 
 export default function CartPage() {
@@ -32,12 +32,12 @@ export default function CartPage() {
       if (data.url) {
         window.location.href = data.url;
       } else {
-        alert(data.error || "Error al procesar la sesión de pago");
+        alert(`Error al procesar el checkout: ${data.error || data.details || "Verifica las variables de entorno de Stripe en Vercel"}`);
         setLoading(false);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert("Error al conectar con Stripe Checkout");
+      alert(`Error de red al conectar con Checkout: ${err.message}`);
       setLoading(false);
     }
   };
