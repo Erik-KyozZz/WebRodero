@@ -80,7 +80,7 @@ export async function POST(req: Request) {
 
     await order.save();
 
-    const origin = req.headers.get("origin") || process.env.NEXTAUTH_URL || "http://localhost:3000";
+    const origin = req.headers.get("origin") || process.env.NEXTAUTH_URL || "https://www.roderostore.com/";
 
     const checkoutSession = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],

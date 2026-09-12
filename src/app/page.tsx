@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Sliders, ArrowRight, Sparkles, Wand2, Plus, Check, Download, MessageSquare, ShoppingBag } from "lucide-react";
+import { Sliders, Wand2, Plus, Check, Download, MessageSquare, ShoppingBag } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 
 interface Product {
@@ -50,11 +50,7 @@ export default function Home() {
       <div className="absolute top-3/4 right-10 w-[500px] h-[500px] bg-blue-600/20 blur-[130px] rounded-full pointer-events-none" />
 
       {/* Hero Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 flex flex-col items-center text-center relative z-10">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-sky-400/15 text-sky-300 border border-sky-400/30 text-xs font-semibold uppercase tracking-wider mb-6 shadow-md shadow-sky-400/10">
-          <Sparkles className="w-3.5 h-3.5" /> Tienda Oficial & Servicios Musicales
-        </div>
-
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-12 flex flex-col items-center text-center relative z-10">
         <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black tracking-tight text-white max-w-5xl leading-none drop-shadow-lg">
           RODERO <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-300 via-cyan-400 to-blue-400">MUSIC</span>
         </h1>
@@ -62,17 +58,6 @@ export default function Home() {
         <p className="mt-6 text-lg sm:text-xl text-slate-200 max-w-3xl font-light">
           Presets Vocales profesionales de estudio y servicio personalizado de Composición de Canciones exclusivas por Rodero.
         </p>
-
-        <div className="mt-8 flex flex-wrap justify-center gap-4">
-          <a
-            href="#cat-products"
-            className="flex items-center gap-2 bg-gradient-to-r from-sky-400 to-blue-600 hover:from-sky-300 hover:to-blue-500 text-slate-950 font-black px-7 py-3.5 rounded-2xl shadow-xl shadow-sky-400/30 transition-all hover:scale-105 text-base"
-          >
-            <Sliders className="w-5 h-5" />
-            Ver Catálogo Abajo
-            <ArrowRight className="w-4 h-4 ml-1" />
-          </a>
-        </div>
       </section>
 
       {/* Products Section on Homepage */}
