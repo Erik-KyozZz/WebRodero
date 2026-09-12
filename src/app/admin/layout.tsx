@@ -16,6 +16,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: "/admin/users", label: "Usuarios & Roles", icon: Users },
   ];
 
+  const handleSignOut = () => {
+    signOut({ callbackUrl: "/" });
+  };
+
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -34,7 +38,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   href={link.href}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition-all ${
                     isActive
-                      ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20"
+                      ? "bg-gradient-to-r from-sky-400 to-blue-600 text-slate-950 font-bold shadow-lg shadow-sky-400/20"
                       : "text-slate-400 hover:text-white hover:bg-slate-800"
                   }`}
                 >
@@ -46,7 +50,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
             <div className="pt-4 border-t border-slate-800">
               <button
-                onClick={() => signOut()}
+                onClick={handleSignOut}
                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm text-rose-400 hover:bg-rose-500/10 transition-colors"
               >
                 <LogOut className="w-4 h-4" />
