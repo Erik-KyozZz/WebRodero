@@ -15,31 +15,32 @@ html, body {
   padding: 0;
   overflow-x: hidden;
   color: rgb(var(--foreground-rgb));
-  background: #020617;
+  background: linear-gradient(135deg, #0b192c 0%, #081225 50%, #030814 100%);
+  background-attachment: fixed;
 }
 
-/* Custom Scrollbar Aesthetic (Cyan/Dark Slate) */
+/* Custom Scrollbar Aesthetic (Cyan/Blue) */
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #090d16;
+  background: #081225;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: #1e3a8a;
   border-radius: 9999px;
-  border: 2px solid #090d16;
+  border: 2px solid #081225;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #06b6d4;
+  background: #38bdf8;
 }
 
 /* Firefox scrollbar styling */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #1e293b #090d16;
+  scrollbar-color: #1e3a8a #081225;
 }
