@@ -3,6 +3,9 @@ import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import crypto from "crypto";
 
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+
 export async function POST(req: Request) {
   try {
     const formData = await req.formData();
@@ -15,27 +18,41 @@ export async function POST(req: Request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Crear carpeta uploads en public si no existe
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-    await mkdir(uploadDir, { recursive: true });
+    let publicUrl = "";
+    let isBase64Fallback = false;
 
-    // Generar nombre de archivo único
-    const fileExt = path.extname(file.name);
-    const uniqueFileName = `${Date.now()}-${crypto.randomBytes(4).toString("hex")}${fileExt}`;
-    const filePath = path.join(uploadDir, uniqueFileName);
+    try {
+      // Intentar guardar en disco local (funciona en servidor propio / localhost)
+      const uploadDir = path.join(process.cwd(), "public", "uploads");
+      await mkdir(uploadDir, { recursive: true });
 
-    await writeFile(filePath, buffer);
+      const fileExt = path.extname(file.name) || ".bin";
+      const uniqueFileName = `${Date.now()}-${crypto.randomBytes(4).toString("hex")}${fileExt}`;
+      const filePath = path.join(uploadDir, uniqueFileName);
 
-    const publicUrl = `/uploads/${uniqueFileName}`;
+      await writeFile(filePath, buffer);
+      publicUrl = `/uploads/${uniqueFileName}`;
+    } catch (fsError: any) {
+      console.warn("Error guardando en sistema de archivos (ej. Vercel read-only). Usando fallback Data URI Base64:", fsError);
+      // Fallback para entornos sin disco escribible (ej. Vercel Serverless)
+      const mimeType = file.type || "application/octet-stream";
+      const base64 = buffer.toString("base64");
+      publicUrl = `data:${mimeType};base64,${base64}`;
+      isBase64Fallback = true;
+    }
 
     return NextResponse.json({
       url: publicUrl,
       fileName: file.name,
+      isBase64: isBase64Fallback,
     });
   } catch (error: any) {
     console.error("Error al subir archivo:", error);
     return NextResponse.json(
-      { error: "Error al guardar el archivo", details: error.message },
+      { 
+        error: "Error al guardar el archivo", 
+        details: error?.message || String(error) 
+      },
       { status: 500 }
     );
   }
@@ -50,22 +67,27 @@ export async function GET() {
 
     const files = await Promise.all(
       fileNames.map(async (name) => {
-        const filePath = path.join(uploadDir, name);
-        const stats = await stat(filePath);
-        return {
-          fileName: name,
-          url: `/uploads/${name}`,
-          size: stats.size,
-          createdAt: stats.birthtime,
-        };
+        try {
+          const filePath = path.join(uploadDir, name);
+          const stats = await stat(filePath);
+          return {
+            fileName: name,
+            url: `/uploads/${name}`,
+            size: stats.size,
+            createdAt: stats.birthtime,
+          };
+        } catch {
+          return null;
+        }
       })
     );
 
-    files.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    const validFiles = files
+      .filter((f): f is NonNullable<typeof f> => f !== null)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-    return NextResponse.json({ files });
+    return NextResponse.json({ files: validFiles });
   } catch (error: any) {
     return NextResponse.json({ files: [] });
   }
 }
-

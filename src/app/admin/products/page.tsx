@@ -94,11 +94,12 @@ export default function AdminProductsPage() {
         }));
         loadServerFiles();
       } else {
-        alert(result.error || "Error al subir el archivo");
+        const errorMsg = result.details ? `${result.error}: ${result.details}` : (result.error || "Error al subir el archivo");
+        alert(errorMsg);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert("Error en la subida del archivo");
+      alert("Error en la red o subida del archivo: " + (err.message || String(err)));
     } finally {
       setUploading(false);
     }
