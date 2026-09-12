@@ -164,30 +164,7 @@ export default function Home() {
         )}
       </section>
 
-      {/* Services Explanation */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-slate-700/50">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left w-full">
-          <div className="p-8 rounded-3xl bg-slate-900/80 border border-slate-700/70 backdrop-blur-md shadow-xl">
-            <div className="w-14 h-14 bg-sky-400/15 rounded-2xl flex items-center justify-center text-sky-300 mb-6 border border-sky-400/30 shadow-md shadow-sky-400/10">
-              <Sliders className="w-7 h-7" />
-            </div>
-            <h3 className="text-2xl font-bold text-white mb-3">Presets Vocales Pro</h3>
-            <p className="text-slate-300 text-base leading-relaxed">
-              Cadenas de mezcla vocal preparadas para Logic Pro, FL Studio, Ableton y Pro Tools. Obtén un sonido limpio, potente y listo para sonar en plataformas digitales.
-            </p>
-          </div>
 
-          <div className="p-8 rounded-3xl bg-slate-900/80 border border-slate-700/70 backdrop-blur-md shadow-xl">
-            <div className="w-14 h-14 bg-blue-500/15 rounded-2xl flex items-center justify-center text-blue-300 mb-6 border border-blue-400/30 shadow-md shadow-blue-400/10">
-              <Wand2 className="w-7 h-7" />
-            </div>
-            <h3 className="text-2xl font-bold text-white mb-3">Canciones a Medida</h3>
-            <p className="text-slate-300 text-base leading-relaxed">
-              Servicio exclusivo de composición personalizada, creación de letras originales, producción de estudio y grabación vocal realizada a medida por Rodero.
-            </p>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }
