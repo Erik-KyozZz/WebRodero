@@ -62,6 +62,9 @@ export async function POST(req: Request) {
         price: dbProduct.price,
         quantity: item.quantity,
         isDigital: dbProduct.isDigital !== undefined ? dbProduct.isDigital : true,
+        filePath: dbProduct.filePath || "",
+        fileName: dbProduct.fileName || "",
+        downloadUrl: dbProduct.downloadUrl || "",
       });
 
       totalAmount += dbProduct.price * item.quantity;

@@ -103,8 +103,8 @@ export default function MyOrdersPage() {
                 </h4>
                 {order.items.map((item: any, idx: number) => {
                   const productObj = item.product || {};
-                  const downloadLink = productObj.filePath || productObj.downloadUrl;
-                  const fileName = productObj.fileName || "Descargar Archivo";
+                  const downloadLink = item.filePath || productObj.filePath || item.downloadUrl || productObj.downloadUrl;
+                  const fileName = item.fileName || productObj.fileName || "Archivo Adjunto";
 
                   return (
                     <div
@@ -125,12 +125,12 @@ export default function MyOrdersPage() {
                         {downloadLink ? (
                           <a
                             href={downloadLink}
-                            download={productObj.fileName || true}
+                            download={fileName}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-2 bg-gradient-to-r from-sky-400 to-blue-600 hover:from-sky-300 hover:to-blue-500 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs shadow-md shadow-sky-400/20 transition-all"
                           >
-                            <Download className="w-4 h-4" /> {productObj.fileName ? `Descargar (${productObj.fileName})` : "Descargar Producto"}
+                            <Download className="w-4 h-4" /> {fileName ? `Descargar (${fileName})` : "Descargar Producto"}
                           </a>
                         ) : (
                           <span className="text-xs text-slate-400 italic">

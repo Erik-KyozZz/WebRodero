@@ -6,6 +6,9 @@ export interface IOrderItem {
   price: number;
   quantity: number;
   isDigital: boolean;
+  filePath?: string;
+  fileName?: string;
+  downloadUrl?: string;
 }
 
 export interface IOrder extends Document {
@@ -38,6 +41,9 @@ const OrderSchema = new Schema<IOrder>(
         price: { type: Number, required: true },
         quantity: { type: Number, required: true },
         isDigital: { type: Boolean, default: true },
+        filePath: { type: String },
+        fileName: { type: String },
+        downloadUrl: { type: String },
       },
     ],
     totalAmount: { type: Number, required: true },
