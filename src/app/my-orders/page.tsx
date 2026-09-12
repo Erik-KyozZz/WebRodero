@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Download, ShoppingBag, CheckCircle, Clock, ExternalLink, Sliders } from "lucide-react";
+import { Download, ShoppingBag, CheckCircle, Sliders } from "lucide-react";
 import { useSession } from "next-auth/react";
 
 export default function MyOrdersPage() {
@@ -11,30 +11,35 @@ export default function MyOrdersPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (status === "authenticated") {
-      fetch("/api/user/orders")
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.orders) setOrders(data.orders);
-          setLoading(false);
-        })
-        .catch((err) => {
-          console.error(err);
-          setLoading(false);
-        });
-    } else if (status === "unauthenticated") {
-      setLoading(false);
+    let localIds: string[] = [];
+    if (typeof window !== "undefined") {
+      try {
+        localIds = JSON.parse(localStorage.getItem("rodero_orders") || "[]");
+      } catch (e) {}
     }
+
+    const idsQuery = localIds.length > 0 ? `?ids=${localIds.join(",")}` : "";
+
+    fetch(`/api/user/orders${idsQuery}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.orders) setOrders(data.orders);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
+      });
   }, [status]);
 
-  if (status === "unauthenticated") {
+  if (status === "unauthenticated" && orders.length === 0 && !loading) {
     return (
       <div className="max-w-md mx-auto px-4 py-20 text-center">
         <div className="w-16 h-16 bg-slate-800 text-slate-500 rounded-full flex items-center justify-center mx-auto mb-4">
           <ShoppingBag className="w-8 h-8" />
         </div>
         <h2 className="text-2xl font-bold text-white">Inicia sesión</h2>
-        <p className="text-slate-400 mt-2 text-sm">Debes estar identificado para ver tus compras y descargas.</p>
+        <p className="text-slate-400 mt-2 text-sm">Debes estar identificado para ver tu historial de compras y descargas.</p>
         <Link
           href="/login?callbackUrl=/my-orders"
           className="inline-block mt-6 bg-gradient-to-r from-sky-400 to-blue-600 hover:from-sky-300 hover:to-blue-500 text-slate-950 font-bold px-6 py-3 rounded-xl shadow-lg text-sm"
@@ -82,7 +87,7 @@ export default function MyOrdersPage() {
                   <span className="text-xs text-slate-500 font-semibold uppercase">Pedido</span>
                   <div className="font-mono text-sky-300 font-bold text-base">#{order._id.slice(-8)}</div>
                   <div className="text-xs text-slate-400">
-                    Comprado el {new Date(order.createdAt).toLocaleDateString()}
+                    Comprado el {new Date(order.createdAt).toLocaleDateString("es-ES")}
                   </div>
                 </div>
 

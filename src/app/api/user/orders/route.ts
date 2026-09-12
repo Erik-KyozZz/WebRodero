@@ -6,34 +6,57 @@ import { Product } from "@/models/Product";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import crypto from "crypto";
+import mongoose from "mongoose";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    await connectDB();
     const session = await getServerSession(authOptions);
-    if (!session || !session.user) {
-      return NextResponse.json(
-        { error: "Debes iniciar sesión para ver tu historial de pedidos" },
-        { status: 401 }
-      );
+    const { searchParams } = new URL(req.url);
+    const idsParam = searchParams.get("ids");
+
+    const queryConditions: any[] = [];
+
+    // 1. Añadir condiciones por sesión de usuario si está logueado
+    if (session?.user) {
+      const userEmail = session.user.email;
+      const userId = (session.user as any).id;
+
+      if (userId && mongoose.Types.ObjectId.isValid(userId)) {
+        queryConditions.push({ "user.userId": userId });
+      }
+
+      if (userEmail) {
+        // Búsqueda insensible a mayúsculas/minúsculas para el correo
+        const escapedEmail = userEmail.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        queryConditions.push({ "user.email": { $regex: new RegExp(`^${escapedEmail}$`, "i") } });
+      }
     }
 
-    await connectDB();
+    // 2. Añadir IDs guardados localmente si existen
+    if (idsParam) {
+      const parsedIds = idsParam
+        .split(",")
+        .map((id) => id.trim())
+        .filter((id) => mongoose.Types.ObjectId.isValid(id));
 
-    const userEmail = session.user.email;
-    const userId = (session.user as any).id;
+      if (parsedIds.length > 0) {
+        queryConditions.push({ _id: { $in: parsedIds } });
+      }
+    }
 
-    // Buscar todos los pedidos asociados a este correo o ID de usuario
-    const queryConditions: any[] = [];
-    if (userId) queryConditions.push({ "user.userId": userId });
-    if (userEmail) queryConditions.push({ "user.email": userEmail });
+    if (queryConditions.length === 0) {
+      return NextResponse.json({ orders: [] });
+    }
 
+    // Buscar pedidos que coincidan con cualquier condición
     let allOrders = await Order.find({ $or: queryConditions })
       .populate("items.product")
       .sort({ createdAt: -1 });
 
-    // Verificar si algún pedido en estado "pending" ya ha sido pagado en Stripe
+    // Verificar en Stripe cualquier pedido pendiente
     const stripeKey = process.env.STRIPE_SECRET_KEY;
     if (stripeKey) {
       const stripe = new Stripe(stripeKey);
@@ -46,18 +69,32 @@ export async function GET() {
               if (!order.orderCode) {
                 order.orderCode = "ORD-" + crypto.randomBytes(4).toString("hex").toUpperCase();
               }
-              if (!order.user) order.user = {};
-              if (userId && !order.user.userId) order.user.userId = userId;
+              if (session?.user) {
+                if (!order.user) order.user = {};
+                const userId = (session.user as any).id;
+                if (userId && !order.user.userId) order.user.userId = userId;
+                if (session.user.email && !order.user.email) order.user.email = session.user.email;
+              }
               await order.save();
+
+              // Actualizar stock
+              for (const item of order.items) {
+                if (item.product) {
+                  const productId = (item.product as any)._id || item.product;
+                  await Product.findByIdAndUpdate(productId, {
+                    $inc: { stock: -item.quantity },
+                  });
+                }
+              }
             }
           } catch (e) {
-            console.error("Error verificando Stripe en listado:", e);
+            console.error("Error verificando Stripe:", e);
           }
         }
       }
     }
 
-    // Filtrar solo los pedidos pagados para la entrega de descargas
+    // Retornar todos los pedidos pagados que coincidan
     const paidOrders = await Order.find({
       $or: queryConditions,
       paymentStatus: "paid",
@@ -67,6 +104,7 @@ export async function GET() {
 
     return NextResponse.json({ orders: paidOrders });
   } catch (error: any) {
+    console.error("Error al obtener pedidos:", error);
     return NextResponse.json(
       { error: "Error al obtener tus pedidos", details: error.message },
       { status: 500 }

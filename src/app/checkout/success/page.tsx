@@ -13,6 +13,15 @@ function SuccessContent() {
 
   useEffect(() => {
     if (orderId) {
+      if (typeof window !== "undefined") {
+        try {
+          const existing = JSON.parse(localStorage.getItem("rodero_orders") || "[]");
+          if (!existing.includes(orderId)) {
+            localStorage.setItem("rodero_orders", JSON.stringify([...existing, orderId]));
+          }
+        } catch (e) {}
+      }
+
       fetch(`/api/checkout/verify?orderId=${orderId}`)
         .then((res) => res.json())
         .then((data) => {
@@ -65,8 +74,8 @@ function SuccessContent() {
           <div className="space-y-3 pt-1">
             {order.items.map((item: any, idx: number) => {
               const productObj = item.product || {};
-              const downloadLink = productObj.filePath || productObj.downloadUrl;
-              const fileName = productObj.fileName || "Archivo del Preset";
+              const downloadLink = item.filePath || productObj.filePath || item.downloadUrl || productObj.downloadUrl;
+              const fileName = item.fileName || productObj.fileName || "Archivo del Preset";
 
               return (
                 <div
