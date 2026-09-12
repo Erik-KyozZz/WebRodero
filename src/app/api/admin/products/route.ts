@@ -20,7 +20,7 @@ export async function POST(req: Request) {
     await connectDB();
     const body = await req.json();
 
-    const { name, slug, description, price, images, stock, isDigital, downloadUrl, category, orderIndex, active } = body;
+    const { name, slug, description, price, images, stock, isDigital, downloadUrl, filePath, fileName, category, orderIndex, active } = body;
 
     if (!name || !slug || price === undefined || !category) {
       return NextResponse.json(
@@ -38,6 +38,8 @@ export async function POST(req: Request) {
       stock: stock !== undefined ? stock : 9999,
       isDigital: isDigital !== undefined ? isDigital : true,
       downloadUrl: downloadUrl || "",
+      filePath: filePath || "",
+      fileName: fileName || "",
       category,
       orderIndex: orderIndex !== undefined ? Number(orderIndex) : 0,
       active: active !== undefined ? active : true,

@@ -8,9 +8,11 @@ export interface IProduct extends Document {
   images: string[];
   stock: number;
   isDigital: boolean;
-  downloadUrl?: string;
+  downloadUrl?: string; // Enlace o URL de archivo subido
+  filePath?: string; // Ruta/URL del archivo adjunto para entrega directa
+  fileName?: string; // Nombre del archivo descargable (ej. preset-rodero.zip)
   category: string;
-  orderIndex: number; // Orden de visualización personalizado por el administrador (menor número = primero)
+  orderIndex: number;
   active: boolean;
   createdAt: Date;
 }
@@ -25,6 +27,8 @@ const ProductSchema = new Schema<IProduct>(
     stock: { type: Number, required: true, default: 9999 },
     isDigital: { type: Boolean, default: true },
     downloadUrl: { type: String },
+    filePath: { type: String },
+    fileName: { type: String },
     category: { type: String, required: true },
     orderIndex: { type: Number, default: 0 },
     active: { type: Boolean, default: true },

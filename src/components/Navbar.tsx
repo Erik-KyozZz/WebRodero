@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import { useSession, signOut } from "next-auth/react";
-import { ShoppingBag, User as UserIcon, LogOut, ShieldAlert, Sliders } from "lucide-react";
+import { ShoppingBag, User as UserIcon, LogOut, ShieldAlert, Sliders, Download } from "lucide-react";
 
 export function Navbar() {
   const { totalItems } = useCart();
@@ -28,6 +28,13 @@ export function Navbar() {
           <Link href="/products" className="hover:text-sky-400 transition-colors text-sm font-medium">
             Presets & Servicios
           </Link>
+
+          {session && (
+            <Link href="/my-orders" className="flex items-center gap-1 hover:text-sky-400 transition-colors text-sm font-medium text-slate-300">
+              <Download className="w-4 h-4 text-sky-400" />
+              Mis Descargas
+            </Link>
+          )}
           
           {(session?.user as any)?.role === "admin" && (
             <Link href="/admin" className="flex items-center gap-1 text-sky-400 hover:text-sky-300 transition-colors text-sm font-semibold bg-sky-400/10 px-3 py-1.5 rounded-lg border border-sky-500/20">
