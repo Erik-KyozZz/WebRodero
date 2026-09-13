@@ -12,7 +12,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const links = [
     { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { href: "/admin/products", label: "Presets & Servicios", icon: Sliders },
-    { href: "/admin/orders", label: "Entregas & Pedidos Chat", icon: MessageSquare },
+    { href: "/admin/orders", label: "Entregas & Chat", icon: MessageSquare },
     { href: "/admin/users", label: "Usuarios & Roles", icon: Users },
   ];
 
@@ -21,34 +21,36 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-        {/* Sidebar Nav */}
-        <aside className="md:col-span-1 space-y-2">
-          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 space-y-1 sticky top-20">
-            <div className="px-3 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+    <div className="w-full max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 min-h-screen">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-8">
+        {/* Sidebar Nav (Desktop & Mobile Scroll) */}
+        <aside className="md:col-span-1">
+          <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-3 sm:p-4 space-y-1 md:sticky md:top-20 shadow-xl">
+            <div className="px-3 py-1.5 text-[11px] font-semibold text-slate-500 uppercase tracking-wider hidden md:block">
               Panel Admin - Rodero
             </div>
-            {links.map((link) => {
-              const Icon = link.icon;
-              const isActive = pathname === link.href;
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition-all ${
-                    isActive
-                      ? "bg-gradient-to-r from-sky-400 to-blue-600 text-slate-950 font-bold shadow-lg shadow-sky-400/20"
-                      : "text-slate-400 hover:text-white hover:bg-slate-800"
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  {link.label}
-                </Link>
-              );
-            })}
+            <div className="flex md:flex-col overflow-x-auto gap-1 pb-1 md:pb-0 scrollbar-none">
+              {links.map((link) => {
+                const Icon = link.icon;
+                const isActive = pathname === link.href;
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={`flex items-center gap-2.5 px-3 py-2 sm:py-2.5 rounded-xl font-medium text-xs sm:text-sm whitespace-nowrap transition-all flex-shrink-0 ${
+                      isActive
+                        ? "bg-gradient-to-r from-sky-400 to-blue-600 text-slate-950 font-bold shadow-lg shadow-sky-400/20"
+                        : "text-slate-400 hover:text-white hover:bg-slate-800"
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {link.label}
+                  </Link>
+                );
+              })}
+            </div>
 
-            <div className="pt-4 border-t border-slate-800">
+            <div className="pt-2 md:pt-4 border-t border-slate-800 hidden md:block">
               <button
                 onClick={handleSignOut}
                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm text-rose-400 hover:bg-rose-500/10 transition-colors"
