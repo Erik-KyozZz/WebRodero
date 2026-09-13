@@ -5,19 +5,20 @@ import { rateLimit } from "@/lib/rateLimit";
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0] || req.headers.get("x-real-ip") || "127.0.0.1";
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("x-real-ip") || "127.0.0.1";
 
-  // Rate Limiting for sensitive API routes (e.g. Auth, Messages, Checkout, Upload)
-  if (pathname.startsWith("/api/auth/") || pathname.startsWith("/api/orders/") || pathname.startsWith("/api/checkout")) {
-    const limitResult = rateLimit(ip, 40, 60 * 1000); // 40 requests per minute
+  // Rate Limiting for all API routes (60 requests per minute per IP)
+  if (pathname.startsWith("/api/")) {
+    const limitResult = rateLimit(ip, 60, 60 * 1000);
     if (!limitResult.success) {
       return NextResponse.json(
-        { error: "Demasiadas peticiones. Por seguridad, intente de nuevo en un minuto." },
+        { error: "Demasiadas peticiones. Por motivos de seguridad, intente de nuevo en un minuto." },
         { status: 429, headers: { "Retry-After": "60" } }
       );
     }
   }
 
+  // Strict Admin route authorization
   const isProtectedAdminRoute =
     pathname.startsWith("/admin") || pathname.startsWith("/api/admin");
 
@@ -28,7 +29,7 @@ export async function middleware(req: NextRequest) {
     if (!token || !["admin", "moderator"].includes(userRole)) {
       if (pathname.startsWith("/api/")) {
         return NextResponse.json(
-          { error: "Acceso denegado. Se requieren credenciales de administrador." },
+          { error: "Acceso denegado. Se requieren credenciales de administración." },
           { status: 401 }
         );
       }
@@ -40,14 +41,18 @@ export async function middleware(req: NextRequest) {
   }
 
   const res = NextResponse.next();
-  // Enforce security headers on response
+
+  // Bank-grade security headers enforcement on all responses
+  res.headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
   res.headers.set("X-Frame-Options", "DENY");
   res.headers.set("X-Content-Type-Options", "nosniff");
   res.headers.set("X-XSS-Protection", "1; mode=block");
+  res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=(self)");
 
   return res;
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/api/admin/:path*", "/api/auth/:path*", "/api/orders/:path*", "/api/checkout/:path*"],
+  matcher: ["/admin/:path*", "/api/:path*"],
 };
