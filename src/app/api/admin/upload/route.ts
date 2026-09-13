@@ -2,9 +2,18 @@ import { NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import crypto from "crypto";
+import { sanitizeFilename } from "@/lib/security";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
+
+// Allowed extensions for audio presets, samples, archives, and images
+const ALLOWED_EXTENSIONS = new Set([
+  ".zip", ".rar", ".7z", ".preset", ".fst", ".fxp", ".wav", ".mp3", ".flac",
+  ".png", ".jpg", ".jpeg", ".webp", ".pdf"
+]);
+
+const MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024; // 50MB
 
 export async function POST(req: Request) {
   try {
@@ -15,6 +24,22 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "No se proporcionó ningún archivo" }, { status: 400 });
     }
 
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      return NextResponse.json(
+        { error: "El archivo excede el tamaño máximo permitido (50 MB)" },
+        { status: 400 }
+      );
+    }
+
+    const fileExt = path.extname(file.name).toLowerCase() || ".bin";
+    if (!ALLOWED_EXTENSIONS.has(fileExt)) {
+      return NextResponse.json(
+        { error: `Tipo de archivo no permitido (${fileExt}). Extensiones válidas: .zip, .rar, .preset, .fst, .png, .jpg, .wav, etc.` },
+        { status: 400 }
+      );
+    }
+
+    const safeOriginalName = sanitizeFilename(file.name);
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
@@ -22,19 +47,16 @@ export async function POST(req: Request) {
     let isBase64Fallback = false;
 
     try {
-      // Intentar guardar en disco local (funciona en servidor propio / localhost)
       const uploadDir = path.join(process.cwd(), "public", "uploads");
       await mkdir(uploadDir, { recursive: true });
 
-      const fileExt = path.extname(file.name) || ".bin";
-      const uniqueFileName = `${Date.now()}-${crypto.randomBytes(4).toString("hex")}${fileExt}`;
+      const uniqueFileName = `${Date.now()}-${crypto.randomBytes(4).toString("hex")}-${safeOriginalName}`;
       const filePath = path.join(uploadDir, uniqueFileName);
 
       await writeFile(filePath, buffer);
       publicUrl = `/uploads/${uniqueFileName}`;
     } catch (fsError: any) {
-      console.warn("Error guardando en sistema de archivos (ej. Vercel read-only). Usando fallback Data URI Base64:", fsError);
-      // Fallback para entornos sin disco escribible (ej. Vercel Serverless)
+      console.warn("Error guardando en sistema de archivos local. Usando fallback Base64 Data URI:", fsError);
       const mimeType = file.type || "application/octet-stream";
       const base64 = buffer.toString("base64");
       publicUrl = `data:${mimeType};base64,${base64}`;
@@ -43,14 +65,14 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       url: publicUrl,
-      fileName: file.name,
+      fileName: safeOriginalName,
       isBase64: isBase64Fallback,
     });
   } catch (error: any) {
-    console.error("Error al subir archivo:", error);
+    console.error("Error en subida segura de archivo:", error);
     return NextResponse.json(
       { 
-        error: "Error al guardar el archivo", 
+        error: "Error al procesar la subida del archivo", 
         details: error?.message || String(error) 
       },
       { status: 500 }
@@ -71,8 +93,8 @@ export async function GET() {
           const filePath = path.join(uploadDir, name);
           const stats = await stat(filePath);
           return {
-            fileName: name,
-            url: `/uploads/${name}`,
+            fileName: sanitizeFilename(name),
+            url: `/uploads/${encodeURIComponent(name)}`,
             size: stats.size,
             createdAt: stats.birthtime,
           };

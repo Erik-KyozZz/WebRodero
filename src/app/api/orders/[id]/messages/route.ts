@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/db";
 import { Order } from "@/models/Order";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { isValidObjectId, sanitizeInput } from "@/lib/security";
 
 export async function GET(
   req: Request,
@@ -11,6 +12,10 @@ export async function GET(
   try {
     await connectDB();
     const { id } = await params;
+
+    if (!isValidObjectId(id)) {
+      return NextResponse.json({ error: "Identificador de pedido inválido" }, { status: 400 });
+    }
 
     const order = await Order.findById(id).select("messages user orderCode items totalAmount paymentStatus isDelivered createdAt");
     if (!order) {
@@ -39,6 +44,11 @@ export async function POST(
   try {
     await connectDB();
     const { id } = await params;
+
+    if (!isValidObjectId(id)) {
+      return NextResponse.json({ error: "Identificador de pedido inválido" }, { status: 400 });
+    }
+
     const session = await getServerSession(authOptions);
     const body = await req.json();
 
@@ -50,6 +60,10 @@ export async function POST(
       );
     }
 
+    // Sanitize input text to prevent XSS script injection
+    const sanitizedText = sanitizeInput(text.trim());
+    const sanitizedSenderName = sanitizeInput(senderName || "");
+
     const order = await Order.findById(id);
     if (!order) {
       return NextResponse.json({ error: "Pedido no encontrado" }, { status: 404 });
@@ -59,14 +73,14 @@ export async function POST(
     const isAdmin = (session?.user as any)?.role === "admin";
     const sender = isAdmin ? "admin" : "user";
     const displayName =
-      senderName ||
+      sanitizedSenderName ||
       session?.user?.name ||
       (isAdmin ? "Rodero (Admin)" : order.user?.name || "Cliente");
 
     const newMessage = {
       sender,
       senderName: displayName,
-      text: text.trim(),
+      text: sanitizedText,
       createdAt: new Date(),
     };
 
@@ -74,7 +88,7 @@ export async function POST(
     await order.save();
 
     return NextResponse.json({
-      message: "Mensaje enviado",
+      message: "Mensaje enviado con éxito",
       newMessage,
       messages: order.messages,
     });
