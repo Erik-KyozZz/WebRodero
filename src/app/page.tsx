@@ -54,7 +54,7 @@ export default function Home() {
         <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black tracking-tight text-white max-w-5xl leading-none drop-shadow-lg">
           RODERO <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-300 via-cyan-400 to-blue-400">MUSIC</span>
         </h1>
-        
+
         <p className="mt-6 text-lg sm:text-xl text-slate-200 max-w-3xl font-light">
           Presets Vocales profesionales de estudio y servicio personalizado de Composición de Canciones exclusivas por Rodero.
         </p>
@@ -65,7 +65,7 @@ export default function Home() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
             <h2 className="text-3xl font-bold text-white flex items-center gap-3">
-              <Sliders className="w-7 h-7 text-sky-400" /> Presets Vocales & Servicios
+              <Sliders className="w-7 h-7 text-sky-400" /> PRESETS VOCALES & SERVICIOS
             </h2>
             <p className="text-slate-300 text-sm mt-1">Añade directamente al carrito o explora las cadenas de estudio</p>
           </div>
@@ -104,14 +104,18 @@ export default function Home() {
                     </div>
                   )}
 
-                  <span className="absolute top-3 right-3 bg-sky-400 text-slate-950 text-xs font-bold px-2.5 py-1 rounded-full shadow-md backdrop-blur-md flex items-center gap-1">
-                    {product.category === "Servicio Chat" ? (
+                  <span className={`absolute top-3 right-3 text-xs font-bold px-2.5 py-1 rounded-full shadow-md backdrop-blur-md flex items-center gap-1 ${
+                    product.isDigital
+                      ? "bg-sky-400 text-slate-950"
+                      : "bg-amber-400 text-slate-950"
+                  }`}>
+                    {product.isDigital ? (
                       <>
-                        <MessageSquare className="w-3.5 h-3.5" /> Entrega Chat
+                        <Download className="w-3.5 h-3.5" /> Descarga Digital
                       </>
                     ) : (
                       <>
-                        <Download className="w-3.5 h-3.5" /> Descarga Digital
+                        <MessageSquare className="w-3.5 h-3.5" /> Servicio / Chat
                       </>
                     )}
                   </span>
@@ -140,11 +144,10 @@ export default function Home() {
 
                     <button
                       onClick={() => handleAddToCart(product)}
-                      className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm transition-all ${
-                        addedId === product._id
-                          ? "bg-emerald-600 text-white"
-                          : "bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-300 hover:to-blue-400 text-slate-950 shadow-lg shadow-sky-400/25"
-                      }`}
+                      className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm transition-all ${addedId === product._id
+                        ? "bg-emerald-600 text-white"
+                        : "bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-300 hover:to-blue-400 text-slate-950 shadow-lg shadow-sky-400/25"
+                        }`}
                     >
                       {addedId === product._id ? (
                         <>

@@ -349,15 +349,28 @@ export default function AdminProductsPage() {
                     {product.price.toFixed(2)}€
                   </td>
                   <td className="py-3.5 px-4">
-                    {product.active ? (
-                      <span className="text-emerald-400 text-xs font-semibold flex items-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5" /> Activo
-                      </span>
-                    ) : (
-                      <span className="text-rose-400 text-xs font-semibold flex items-center gap-1">
-                        <XCircle className="w-3.5 h-3.5" /> Inactivo
-                      </span>
-                    )}
+                    <div className="space-y-1">
+                      {product.active ? (
+                        <span className="text-emerald-400 text-xs font-semibold flex items-center gap-1">
+                          <CheckCircle2 className="w-3.5 h-3.5" /> Activo
+                        </span>
+                      ) : (
+                        <span className="text-rose-400 text-xs font-semibold flex items-center gap-1">
+                          <XCircle className="w-3.5 h-3.5" /> Inactivo
+                        </span>
+                      )}
+                      <div>
+                        {product.isDigital ? (
+                          <span className="inline-block text-[11px] font-semibold text-sky-300 bg-sky-500/10 border border-sky-500/30 px-2 py-0.5 rounded-md">
+                            Descarga Digital
+                          </span>
+                        ) : (
+                          <span className="inline-block text-[11px] font-semibold text-amber-300 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded-md">
+                            Servicio / Chat
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </td>
                   <td className="py-3.5 px-4 text-right space-x-2">
                     <button
@@ -597,6 +610,23 @@ export default function AdminProductsPage() {
                   onChange={(e) => setFormData({ ...formData, images: e.target.value })}
                   className="w-full bg-slate-800/90 border border-slate-700 rounded-xl px-3 py-2 text-white text-sm focus:border-sky-400 focus:outline-none"
                 />
+              </div>
+
+              <div className="p-3 bg-slate-800/60 border border-slate-700/80 rounded-2xl space-y-1.5">
+                <label className="flex items-center gap-2.5 cursor-pointer text-white text-xs font-bold">
+                  <input
+                    type="checkbox"
+                    checked={formData.isDigital}
+                    onChange={(e) => setFormData({ ...formData, isDigital: e.target.checked })}
+                    className="w-4 h-4 rounded accent-sky-400"
+                  />
+                  <span>Etiqueta Descarga Digital</span>
+                </label>
+                <p className="text-[11px] text-slate-400 pl-6 leading-normal">
+                  {formData.isDigital
+                    ? "✓ Marcado como 'Descarga Digital': El cliente podrá descargar el archivo comprimido o enlace directamente tras el pago."
+                    : "✕ Desmarcado: Producto de Servicio / Canción Personalizada. Al pagar, se abre un Chat interactivo entre el administrador y la persona para coordinar la creación."}
+                </p>
               </div>
 
               <div className="flex items-center gap-6 pt-1">

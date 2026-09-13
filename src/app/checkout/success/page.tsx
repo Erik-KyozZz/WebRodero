@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
-import { CheckCircle2, Download, ArrowRight, Sliders, FolderDown, FileCheck } from "lucide-react";
+import { CheckCircle2, Download, ArrowRight, Sliders, FolderDown, FileCheck, MessageSquare } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 
 function SuccessContent() {
@@ -107,9 +107,12 @@ function SuccessContent() {
                         <span>Descargar Archivo</span>
                       </a>
                     ) : (
-                      <span className="text-xs text-slate-400 italic bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
-                        Entrega directa vía Chat / Email
-                      </span>
+                      <Link
+                        href="/my-orders"
+                        className="inline-flex items-center gap-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 px-4 py-2 rounded-xl text-xs font-bold transition-all"
+                      >
+                        <MessageSquare className="w-4 h-4" /> Abrir Chat de Canción / Servicio
+                      </Link>
                     )}
                   </div>
                 </div>

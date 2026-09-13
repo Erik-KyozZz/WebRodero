@@ -2,13 +2,15 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Download, ShoppingBag, CheckCircle, Sliders } from "lucide-react";
+import { Download, ShoppingBag, CheckCircle, Sliders, MessageSquare } from "lucide-react";
 import { useSession } from "next-auth/react";
+import OrderChatModal from "@/components/OrderChatModal";
 
 export default function MyOrdersPage() {
   const { data: session, status } = useSession();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeChatOrder, setActiveChatOrder] = useState<any | null>(null);
 
   useEffect(() => {
     let localIds: string[] = [];
@@ -91,7 +93,14 @@ export default function MyOrdersPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    onClick={() => setActiveChatOrder(order)}
+                    className="inline-flex items-center gap-2 bg-gradient-to-r from-sky-400 to-blue-600 hover:from-sky-300 hover:to-blue-500 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs shadow-md shadow-sky-400/20 transition-all"
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                    <span>Chat con Rodero {order.messages?.length ? `(${order.messages.length})` : ""}</span>
+                  </button>
                   <span className="inline-flex items-center gap-1 text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full font-semibold">
                     <CheckCircle className="w-3.5 h-3.5" /> Pago Confirmado
                   </span>
@@ -104,7 +113,7 @@ export default function MyOrdersPage() {
               {/* Items & Downloads list */}
               <div className="space-y-3 pt-2">
                 <h4 className="text-xs font-semibold uppercase text-slate-400 tracking-wider">
-                  Archivos de tu pedido:
+                  Archivos & Servicios de tu pedido:
                 </h4>
                 {order.items.map((item: any, idx: number) => {
                   const productObj = item.product || {};
@@ -122,7 +131,14 @@ export default function MyOrdersPage() {
                         </div>
                         <div>
                           <div className="font-bold text-white text-sm">{item.name}</div>
-                          <div className="text-xs text-slate-400">Cantidad: {item.quantity}</div>
+                          <div className="text-xs text-slate-400">
+                            Cantidad: {item.quantity} •{" "}
+                            {item.isDigital !== false ? (
+                              <span className="text-sky-400">Descarga Digital</span>
+                            ) : (
+                              <span className="text-amber-400">Servicio Personalizado / Chat</span>
+                            )}
+                          </div>
                         </div>
                       </div>
 
@@ -138,9 +154,12 @@ export default function MyOrdersPage() {
                             <Download className="w-4 h-4" /> {fileName ? `Descargar (${fileName})` : "Descargar Producto"}
                           </a>
                         ) : (
-                          <span className="text-xs text-slate-400 italic">
-                            Entrega personalizada por Chat / WhatsApp
-                          </span>
+                          <button
+                            onClick={() => setActiveChatOrder(order)}
+                            className="inline-flex items-center gap-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 px-4 py-2 rounded-xl text-xs font-bold transition-all"
+                          >
+                            <MessageSquare className="w-4 h-4" /> Abrir Chat de Canción / Servicio
+                          </button>
                         )}
                       </div>
                     </div>
@@ -150,6 +169,16 @@ export default function MyOrdersPage() {
             </div>
           ))}
         </div>
+      )}
+
+      {activeChatOrder && (
+        <OrderChatModal
+          orderId={activeChatOrder._id}
+          orderCode={activeChatOrder.orderCode}
+          customerName={session?.user?.name || activeChatOrder.user?.name || "Cliente"}
+          isAdmin={false}
+          onClose={() => setActiveChatOrder(null)}
+        />
       )}
     </div>
   );

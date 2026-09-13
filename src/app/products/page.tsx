@@ -84,14 +84,18 @@ export default function ProductsPage() {
                   </div>
                 )}
 
-                <span className="absolute top-3 right-3 bg-cyan-500/90 text-slate-950 text-xs font-bold px-2.5 py-1 rounded-full backdrop-blur-md flex items-center gap-1">
-                  {product.category === "Servicio Chat" ? (
+                <span className={`absolute top-3 right-3 text-xs font-bold px-2.5 py-1 rounded-full backdrop-blur-md flex items-center gap-1 ${
+                  product.isDigital
+                    ? "bg-cyan-500/90 text-slate-950"
+                    : "bg-amber-400 text-slate-950"
+                }`}>
+                  {product.isDigital ? (
                     <>
-                      <MessageSquare className="w-3.5 h-3.5" /> Entrega Chat
+                      <Download className="w-3.5 h-3.5" /> Descarga Digital
                     </>
                   ) : (
                     <>
-                      <Download className="w-3.5 h-3.5" /> Descarga Digital
+                      <MessageSquare className="w-3.5 h-3.5" /> Servicio / Chat
                     </>
                   )}
                 </span>

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Search, CheckCircle, XCircle, RefreshCw, MessageSquare, Clock } from "lucide-react";
+import OrderChatModal from "@/components/OrderChatModal";
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -9,6 +10,7 @@ export default function AdminOrdersPage() {
   const [searchCode, setSearchCode] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [activeChatOrder, setActiveChatOrder] = useState<any | null>(null);
 
   const fetchOrders = () => {
     setLoading(true);
@@ -148,8 +150,14 @@ export default function AdminOrdersPage() {
                       {order.items.map((it: any, idx: number) => (
                         <div key={idx} className="text-xs">
                           <span className="font-semibold text-white">{it.quantity}x</span> {it.name}
-                          <span className="ml-1.5 text-[10px] bg-cyan-500/10 text-cyan-300 px-1.5 py-0.5 rounded border border-cyan-500/20">
-                            Digital
+                          <span
+                            className={`ml-1.5 text-[10px] px-1.5 py-0.5 rounded border ${
+                              it.isDigital !== false
+                                ? "bg-cyan-500/10 text-cyan-300 border-cyan-500/20"
+                                : "bg-amber-500/10 text-amber-300 border-amber-500/20"
+                            }`}
+                          >
+                            {it.isDigital !== false ? "Digital" : "Servicio / Chat"}
                           </span>
                         </div>
                       ))}
@@ -169,7 +177,15 @@ export default function AdminOrdersPage() {
                       </span>
                     )}
                   </td>
-                  <td className="py-3.5 px-4 text-right">
+                  <td className="py-3.5 px-4 text-right space-x-2">
+                    <button
+                      onClick={() => setActiveChatOrder(order)}
+                      className="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/30 transition-all"
+                      title="Abrir chat del pedido"
+                    >
+                      <MessageSquare className="w-3.5 h-3.5" />
+                      <span>Chat ({order.messages?.length || 0})</span>
+                    </button>
                     <button
                       onClick={() => handleToggleDelivered(order._id, order.isDelivered)}
                       disabled={updatingId === order._id}
@@ -191,6 +207,19 @@ export default function AdminOrdersPage() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {activeChatOrder && (
+        <OrderChatModal
+          orderId={activeChatOrder._id}
+          orderCode={activeChatOrder.orderCode}
+          customerName={activeChatOrder.user?.name}
+          isAdmin={true}
+          onClose={() => {
+            setActiveChatOrder(null);
+            fetchOrders();
+          }}
+        />
       )}
     </div>
   );

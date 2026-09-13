@@ -11,6 +11,14 @@ export interface IOrderItem {
   downloadUrl?: string;
 }
 
+export interface IOrderMessage {
+  _id?: string;
+  sender: "user" | "admin";
+  senderName: string;
+  text: string;
+  createdAt: Date;
+}
+
 export interface IOrder extends Document {
   user?: {
     name?: string;
@@ -24,6 +32,7 @@ export interface IOrder extends Document {
   orderCode?: string; // Código de pedido/licencia único
   isDelivered: boolean; // Control de entrega por chat / digital
   notes?: string;
+  messages: IOrderMessage[];
   createdAt: Date;
 }
 
@@ -56,6 +65,14 @@ const OrderSchema = new Schema<IOrder>(
     orderCode: { type: String },
     isDelivered: { type: Boolean, default: false },
     notes: { type: String },
+    messages: [
+      {
+        sender: { type: String, enum: ["user", "admin"], required: true },
+        senderName: { type: String, default: "" },
+        text: { type: String, required: true },
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
   },
   { timestamps: true }
 );
