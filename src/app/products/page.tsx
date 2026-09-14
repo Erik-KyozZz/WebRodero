@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useCart } from "@/context/CartContext";
+import ProductImage from "@/components/ProductImage";
 import { Sliders, ShoppingBag, Plus, Check, Download, MessageSquare } from "lucide-react";
 
 interface Product {
@@ -71,18 +72,12 @@ export default function ProductsPage() {
               className="group bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden hover:border-cyan-500/40 transition-all flex flex-col shadow-lg"
             >
               <div className="relative h-44 sm:h-48 bg-slate-800/80 overflow-hidden flex items-center justify-center">
-                {product.images && product.images.length > 0 ? (
-                  <img
-                    src={product.images[0]}
-                    alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                ) : (
-                  <div className="flex flex-col items-center text-slate-500">
-                    <Sliders className="w-12 h-12 text-cyan-400 mb-1" />
-                    <span className="text-xs">Sin vista previa</span>
-                  </div>
-                )}
+                <ProductImage
+                  src={product.images}
+                  alt={product.name}
+                  category={product.category}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
 
                 <span className={`absolute top-3 right-3 text-[11px] sm:text-xs font-bold px-2.5 py-1 rounded-full backdrop-blur-md flex items-center gap-1 ${
                   product.isDigital

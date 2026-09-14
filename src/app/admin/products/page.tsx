@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import ProductImage from "@/components/ProductImage";
 import { 
   Plus, Edit2, Trash2, CheckCircle2, XCircle, Sliders, ArrowUp, ArrowDown, X, 
-  Upload, FileCheck, FolderOpen, Download, CloudUpload, FileText, Check, ExternalLink 
+  Upload, FileCheck, FolderOpen, Download, CloudUpload, FileText, Check, ExternalLink, Image as ImageIcon
 } from "lucide-react";
 
 interface ServerFile {
@@ -108,6 +109,40 @@ export default function AdminProductsPage() {
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) processFileUpload(file);
+  };
+
+  const processImageUpload = async (file: File) => {
+    if (!file) return;
+    setUploading(true);
+    const data = new FormData();
+    data.append("file", file);
+    data.append("isImageCover", "true");
+
+    try {
+      const res = await fetch("/api/admin/upload", {
+        method: "POST",
+        body: data,
+      });
+
+      const result = await res.json();
+      if (res.ok) {
+        setFormData((prev) => ({
+          ...prev,
+          images: prev.images ? `${prev.images}, ${result.url}` : result.url,
+        }));
+      } else {
+        alert("Error al subir portada: " + (result.error || "Error de subida"));
+      }
+    } catch (err: any) {
+      alert("Error de red al subir la imagen: " + (err.message || String(err)));
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleCoverImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) processImageUpload(file);
   };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -314,11 +349,20 @@ export default function AdminProductsPage() {
                     </div>
                   </td>
                   <td className="py-3.5 px-4">
-                    <div className="font-bold text-white flex items-center gap-2">
-                      <Sliders className="w-4 h-4 text-sky-400" />
-                      {product.name}
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 border border-slate-700">
+                        <ProductImage
+                          src={product.images}
+                          alt={product.name}
+                          category={product.category}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div>
+                        <div className="font-bold text-white text-sm">{product.name}</div>
+                        <div className="text-xs text-slate-500 font-mono">{product.slug}</div>
+                      </div>
                     </div>
-                    <div className="text-xs text-slate-500 font-mono">{product.slug}</div>
                   </td>
                   <td className="py-3.5 px-4 text-slate-300 text-xs">
                     {product.filePath ? (
@@ -599,17 +643,47 @@ export default function AdminProductsPage() {
                 />
               </div>
 
-              <div>
-                <label className="block text-slate-400 text-xs uppercase mb-1">
-                  URLs de Imágenes de Portada
+              <div className="space-y-2">
+                <label className="block text-slate-400 text-xs uppercase">
+                  Imagen de Portada (URL o Archivo Directo)
                 </label>
-                <input
-                  type="text"
-                  placeholder="https://.../preset-cover.jpg"
-                  value={formData.images}
-                  onChange={(e) => setFormData({ ...formData, images: e.target.value })}
-                  className="w-full bg-slate-800/90 border border-slate-700 rounded-xl px-3 py-2 text-white text-sm focus:border-sky-400 focus:outline-none"
-                />
+
+                <div className="flex flex-col sm:flex-row gap-3 items-center">
+                  <div className="w-20 h-20 rounded-xl overflow-hidden border border-slate-700/80 shadow-md flex-shrink-0">
+                    <ProductImage
+                      src={formData.images.split(",").map((s) => s.trim()).filter(Boolean)}
+                      alt="Vista Previa Portada"
+                      category={formData.category}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+
+                  <div className="flex-1 space-y-2 w-full">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="https://.../imagen.jpg (o sube abajo)"
+                        value={formData.images}
+                        onChange={(e) => setFormData({ ...formData, images: e.target.value })}
+                        className="flex-1 bg-slate-800/90 border border-slate-700 rounded-xl px-3 py-2 text-white text-xs focus:border-sky-400 focus:outline-none"
+                      />
+                      <label className="bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors flex-shrink-0">
+                        <ImageIcon className="w-4 h-4" />
+                        <span>Subir Foto</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleCoverImageChange}
+                          className="hidden"
+                          disabled={uploading}
+                        />
+                      </label>
+                    </div>
+                    <p className="text-[11px] text-slate-400">
+                      Sube una imagen desde tu dispositivo o introduce una URL (HTTP/HTTPS/Base64). Si falla o no carga en algún dispositivo, se mostrará automáticamente la portada temática del estudio.
+                    </p>
+                  </div>
+                </div>
               </div>
 
               <div className="p-3 bg-slate-800/60 border border-slate-700/80 rounded-2xl space-y-1.5">

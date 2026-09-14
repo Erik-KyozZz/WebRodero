@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Sliders, Wand2, Plus, Check, Download, MessageSquare, ShoppingBag } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import ProductImage from "@/components/ProductImage";
 
 interface Product {
   _id: string;
@@ -91,18 +92,12 @@ export default function Home() {
                 className="group bg-slate-900/80 border border-slate-700/70 rounded-2xl overflow-hidden hover:border-sky-400/60 transition-all shadow-xl hover:shadow-sky-500/10 flex flex-col"
               >
                 <div className="relative h-44 sm:h-48 bg-slate-800/90 overflow-hidden flex items-center justify-center">
-                  {product.images && product.images.length > 0 ? (
-                    <img
-                      src={product.images[0]}
-                      alt={product.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  ) : (
-                    <div className="flex flex-col items-center text-slate-400">
-                      <Sliders className="w-12 h-12 text-sky-400 mb-1" />
-                      <span className="text-xs">Vista previa</span>
-                    </div>
-                  )}
+                  <ProductImage
+                    src={product.images}
+                    alt={product.name}
+                    category={product.category}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
 
                   <span className={`absolute top-3 right-3 text-[11px] sm:text-xs font-bold px-2.5 py-1 rounded-full shadow-md backdrop-blur-md flex items-center gap-1 ${
                     product.isDigital

@@ -39,6 +39,7 @@ export async function POST(req: Request) {
       );
     }
 
+    const isImageCover = formData.get("isImageCover") === "true";
     const safeOriginalName = sanitizeFilename(file.name);
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
@@ -46,21 +47,30 @@ export async function POST(req: Request) {
     let publicUrl = "";
     let isBase64Fallback = false;
 
-    try {
-      const uploadDir = path.join(process.cwd(), "public", "uploads");
-      await mkdir(uploadDir, { recursive: true });
+    const isImage = [".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg"].includes(fileExt);
 
-      const uniqueFileName = `${Date.now()}-${crypto.randomBytes(4).toString("hex")}-${safeOriginalName}`;
-      const filePath = path.join(uploadDir, uniqueFileName);
-
-      await writeFile(filePath, buffer);
-      publicUrl = `/uploads/${uniqueFileName}`;
-    } catch (fsError: any) {
-      console.warn("Error guardando en sistema de archivos local. Usando fallback Base64 Data URI:", fsError);
-      const mimeType = file.type || "application/octet-stream";
-      const base64 = buffer.toString("base64");
-      publicUrl = `data:${mimeType};base64,${base64}`;
+    // If requested specifically as base64 image cover and < 6MB, embed directly for 100% multi-device persistence
+    if (isImageCover && isImage && buffer.length <= 6 * 1024 * 1024) {
+      const mimeType = file.type || `image/${fileExt.replace(".", "")}`;
+      publicUrl = `data:${mimeType};base64,${buffer.toString("base64")}`;
       isBase64Fallback = true;
+    } else {
+      try {
+        const uploadDir = path.join(process.cwd(), "public", "uploads");
+        await mkdir(uploadDir, { recursive: true });
+
+        const uniqueFileName = `${Date.now()}-${crypto.randomBytes(4).toString("hex")}-${safeOriginalName}`;
+        const filePath = path.join(uploadDir, uniqueFileName);
+
+        await writeFile(filePath, buffer);
+        publicUrl = `/uploads/${uniqueFileName}`;
+      } catch (fsError: any) {
+        console.warn("Error guardando en sistema de archivos local. Usando fallback Base64 Data URI:", fsError);
+        const mimeType = file.type || "application/octet-stream";
+        const base64 = buffer.toString("base64");
+        publicUrl = `data:${mimeType};base64,${base64}`;
+        isBase64Fallback = true;
+      }
     }
 
     return NextResponse.json({

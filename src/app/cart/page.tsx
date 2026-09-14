@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useCart } from "@/context/CartContext";
+import ProductImage from "@/components/ProductImage";
 import { ShoppingBag, Trash2, Plus, Minus, CreditCard, ArrowRight, Download } from "lucide-react";
 import { useSession } from "next-auth/react";
 
@@ -67,8 +68,12 @@ export default function CartPage() {
               className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-slate-900/60 border border-slate-800 rounded-2xl gap-4 shadow-lg"
             >
               <div className="flex items-center gap-3.5 w-full sm:w-auto">
-                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-slate-800 rounded-xl flex items-center justify-center text-cyan-400 flex-shrink-0">
-                  <Download className="w-6 h-6 sm:w-8 sm:h-8" />
+                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden flex-shrink-0 border border-slate-700/80 shadow-md">
+                  <ProductImage
+                    src={item.images}
+                    alt={item.name}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 <div className="min-w-0 flex-1">
                   <h3 className="font-bold text-white text-sm sm:text-base flex flex-wrap items-center gap-2">

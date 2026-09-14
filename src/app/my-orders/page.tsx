@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Download, ShoppingBag, CheckCircle, Sliders, MessageSquare } from "lucide-react";
 import { useSession } from "next-auth/react";
 import OrderChatModal from "@/components/OrderChatModal";
+import ProductImage from "@/components/ProductImage";
 
 export default function MyOrdersPage() {
   const { data: session, status } = useSession();
@@ -126,8 +127,12 @@ export default function MyOrdersPage() {
                       className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3.5 sm:p-4 bg-slate-800/60 rounded-xl sm:rounded-2xl border border-slate-700/50 gap-3"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 sm:w-10 sm:h-10 bg-sky-400/10 text-sky-400 rounded-xl flex items-center justify-center border border-sky-400/20 flex-shrink-0">
-                          <Sliders className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl overflow-hidden flex-shrink-0 border border-slate-700/80 shadow-md">
+                          <ProductImage
+                            src={item.images || productObj.images}
+                            alt={item.name}
+                            className="w-full h-full object-cover"
+                          />
                         </div>
                         <div>
                           <div className="font-bold text-white text-xs sm:text-sm">{item.name}</div>
