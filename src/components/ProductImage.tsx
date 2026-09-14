@@ -23,7 +23,7 @@ export function normalizeImageUrl(url: string | undefined | null): string {
   if (!cleaned) return "";
 
   // Handle Base64 Data URIs directly
-  if (cleaned.startsWith("data:image/")) {
+  if (cleaned.startsWith("data:image/") || cleaned.startsWith("data:")) {
     return cleaned;
   }
 

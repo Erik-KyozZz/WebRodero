@@ -248,9 +248,13 @@ export default function AdminProductsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const parsedImages = formData.images.startsWith("data:")
+      ? [formData.images]
+      : formData.images.split(",").map((img) => img.trim()).filter(Boolean);
+
     const payload = {
       ...formData,
-      images: formData.images.split(",").map((img) => img.trim()).filter(Boolean),
+      images: parsedImages,
     };
 
     if (editingId) {
@@ -651,7 +655,11 @@ export default function AdminProductsPage() {
                 <div className="flex flex-col sm:flex-row gap-3 items-center">
                   <div className="w-20 h-20 rounded-xl overflow-hidden border border-slate-700/80 shadow-md flex-shrink-0">
                     <ProductImage
-                      src={formData.images.split(",").map((s) => s.trim()).filter(Boolean)}
+                      src={
+                        formData.images.startsWith("data:")
+                          ? [formData.images]
+                          : formData.images.split(",").map((s) => s.trim()).filter(Boolean)
+                      }
                       alt="Vista Previa Portada"
                       category={formData.category}
                       className="w-full h-full object-cover"
