@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { Search, CheckCircle, XCircle, RefreshCw, MessageSquare, Clock } from "lucide-react";
 import OrderChatModal from "@/components/OrderChatModal";
+import ProductImage from "@/components/ProductImage";
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -146,19 +147,29 @@ export default function AdminOrdersPage() {
                     <div className="text-xs text-slate-400">{order.user?.email}</div>
                   </td>
                   <td className="py-3.5 px-4">
-                    <div className="space-y-1">
+                    <div className="space-y-1.5">
                       {order.items.map((it: any, idx: number) => (
-                        <div key={idx} className="text-xs">
-                          <span className="font-semibold text-white">{it.quantity}x</span> {it.name}
-                          <span
-                            className={`ml-1.5 text-[10px] px-1.5 py-0.5 rounded border ${
-                              it.isDigital !== false
-                                ? "bg-cyan-500/10 text-cyan-300 border-cyan-500/20"
-                                : "bg-amber-500/10 text-amber-300 border-amber-500/20"
-                            }`}
-                          >
-                            {it.isDigital !== false ? "Digital" : "Servicio / Chat"}
-                          </span>
+                        <div key={idx} className="flex items-center gap-2 text-xs">
+                          <div className="w-7 h-7 rounded overflow-hidden flex-shrink-0 border border-slate-700">
+                            <ProductImage
+                              src={it.images || (it.product && it.product.images)}
+                              alt={it.name}
+                              category={it.isDigital !== false ? "Presets Vocales" : "Servicios / Mezc."}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div>
+                            <span className="font-semibold text-white">{it.quantity}x</span> {it.name}
+                            <span
+                              className={`ml-1.5 text-[10px] px-1.5 py-0.5 rounded border ${
+                                it.isDigital !== false
+                                  ? "bg-cyan-500/10 text-cyan-300 border-cyan-500/20"
+                                  : "bg-amber-500/10 text-amber-300 border-amber-500/20"
+                              }`}
+                            >
+                              {it.isDigital !== false ? "Digital" : "Servicio / Chat"}
+                            </span>
+                          </div>
                         </div>
                       ))}
                     </div>
