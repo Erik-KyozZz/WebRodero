@@ -49,9 +49,13 @@ export async function POST(req: Request) {
 
     const isImage = [".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg"].includes(fileExt);
 
-    // If requested specifically as base64 image cover and < 6MB, embed directly for 100% multi-device persistence
-    if (isImageCover && isImage && buffer.length <= 6 * 1024 * 1024) {
-      const mimeType = file.type || `image/${fileExt.replace(".", "")}`;
+    // For image covers, embed directly as Base64 Data URI for 100% multi-device & multi-server persistence
+    if (isImageCover && isImage) {
+      let mimeType = file.type;
+      if (!mimeType || mimeType === "application/octet-stream") {
+        const cleanExt = fileExt.replace(".", "").toLowerCase();
+        mimeType = cleanExt === "jpg" ? "image/jpeg" : `image/${cleanExt}`;
+      }
       publicUrl = `data:${mimeType};base64,${buffer.toString("base64")}`;
       isBase64Fallback = true;
     } else {

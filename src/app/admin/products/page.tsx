@@ -128,7 +128,7 @@ export default function AdminProductsPage() {
       if (res.ok) {
         setFormData((prev) => ({
           ...prev,
-          images: prev.images ? `${prev.images}, ${result.url}` : result.url,
+          images: result.url,
         }));
       } else {
         alert("Error al subir portada: " + (result.error || "Error de subida"));
