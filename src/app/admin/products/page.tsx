@@ -114,27 +114,60 @@ export default function AdminProductsPage() {
   const processImageUpload = async (file: File) => {
     if (!file) return;
     setUploading(true);
-    const data = new FormData();
-    data.append("file", file);
-    data.append("isImageCover", "true");
 
     try {
-      const res = await fetch("/api/admin/upload", {
-        method: "POST",
-        body: data,
+      // Client-side image compression & canvas resize to max 800x800 for instant loading on ALL devices & networks
+      const resizedBase64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement("canvas");
+            const MAX_DIM = 800;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+              if (width > MAX_DIM) {
+                height = Math.round((height * MAX_DIM) / width);
+                width = MAX_DIM;
+              }
+            } else {
+              if (height > MAX_DIM) {
+                width = Math.round((width * MAX_DIM) / height);
+                height = MAX_DIM;
+              }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+
+            const ctx = canvas.getContext("2d");
+            if (!ctx) {
+              resolve(event.target?.result as string);
+              return;
+            }
+
+            ctx.drawImage(img, 0, 0, width, height);
+            // Export highly compressed, multi-device compatible image
+            const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+            resolve(dataUrl);
+          };
+          img.onerror = () => resolve(event.target?.result as string);
+          img.src = event.target?.result as string;
+        };
+        reader.onerror = (err) => reject(err);
+        reader.readAsDataURL(file);
       });
 
-      const result = await res.json();
-      if (res.ok) {
-        setFormData((prev) => ({
-          ...prev,
-          images: result.url,
-        }));
-      } else {
-        alert("Error al subir portada: " + (result.error || "Error de subida"));
-      }
+      // Update local form state immediately for instant feedback
+      setFormData((prev) => ({
+        ...prev,
+        images: resizedBase64,
+      }));
     } catch (err: any) {
-      alert("Error de red al subir la imagen: " + (err.message || String(err)));
+      console.error("Error al procesar la imagen:", err);
+      alert("Error al procesar la imagen: " + (err.message || String(err)));
     } finally {
       setUploading(false);
     }
