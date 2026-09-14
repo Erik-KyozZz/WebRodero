@@ -655,11 +655,7 @@ export default function AdminProductsPage() {
                 <div className="flex flex-col sm:flex-row gap-3 items-center">
                   <div className="w-20 h-20 rounded-xl overflow-hidden border border-slate-700/80 shadow-md flex-shrink-0">
                     <ProductImage
-                      src={
-                        formData.images.startsWith("data:")
-                          ? [formData.images]
-                          : formData.images.split(",").map((s) => s.trim()).filter(Boolean)
-                      }
+                      src={formData.images}
                       alt="Vista Previa Portada"
                       category={formData.category}
                       className="w-full h-full object-cover"

@@ -99,11 +99,12 @@ export default function ProductImage({
   const [isLoading, setIsLoading] = useState(true);
 
   // Reset state when src changes
+  const srcKey = Array.isArray(src) ? src.join(",") : src || "";
   useEffect(() => {
     setCurrentIndex(0);
     setHasError(false);
     setIsLoading(true);
-  }, [src]);
+  }, [srcKey]);
 
   const currentUrl = normalizedUrls[currentIndex];
 
